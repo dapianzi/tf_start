@@ -22,3 +22,8 @@ print(x, y)
 # ravel np.c_[]
 print(np.c_[x.ravel(), y.ravel()]) # 快速生成张量切片的下标索引
 
+s1 = np.array([1, 2, 3])
+s2 = np.array([[1, 2, 3], [4, 5, 6]])
+s3 = np.array([[1, 2], [3, 4], [5, 6]])
+print(s2 - s1, s2.max(axis=0), s3.min(axis=1))
+

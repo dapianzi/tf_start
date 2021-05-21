@@ -29,7 +29,7 @@ plt.title('1. 正态分布', fontdict=dict_title)
 x1 = np.random.normal(0, 1, n)
 y1 = np.random.normal(0, 1, n)
 plt.scatter(x1, y1, color='b', marker='*')  # 绘制散点
-plt.text(2.5, 2.5, "均值：1\n标准差：1")
+plt.text(2.5, 2.5, "mean=0\nstd=1")
 plt.xlim(-4, 4)
 plt.ylim(-4, 4)
 plt.xlabel('横坐标x', fontdict=dict_label)

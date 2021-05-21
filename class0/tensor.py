@@ -34,6 +34,13 @@ n3 = tf.random.uniform((2, 3))
 print(tf.shape(n1), tf.rank(n2), tf.size(n3))
 
 # transform
-n4 = tf.convert_to_tensor(np.arange(24).reshape((2,3,4)))
+n4 = tf.convert_to_tensor(np.arange(24).reshape((2, 3, 4)))
 n5 = tf.transpose(n4, (2, 0, 1))
 print(n4, n5)
+
+print(tf.exp(t2))
+
+# compare
+n6 = tf.reshape(n4, (6, 4))
+print(n6, tf.argmax(n6.numpy(), axis=0), tf.argmax(n6.numpy(), axis=1))
+print(tf.equal(tf.argmax(n6.numpy(), axis=0), np.array([11, 15, 19, 23])))
