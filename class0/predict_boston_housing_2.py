@@ -19,7 +19,9 @@ test_n = len(test_x)
 train_x = (train_x - train_x.min(axis=0)) / (train_x.max(axis=0) - train_x.min(axis=0))
 test_x = (test_x - test_x.min(axis=0)) / (test_x.max(axis=0) - test_x.min(axis=0))
 
-# TODO: why concat?
+# (1, x1, x2, x3, ..., xn) * (w0, w1, w2, w3, ..., wn) = w1*x1 + w2*x2 + w3*x3 + ... + wn*xn + w0
+# w1,w2,w3,...,w4   => 特征系数 => 一元回归中的w
+# w0                => 偏移量   => 一元回归中的b
 train_set = tf.cast(tf.concat([np.ones(train_n).reshape(-1, 1), train_x], axis=1), tf.float32)  # 开头拼接一列全1向量
 test_set = tf.cast(tf.concat([np.ones(test_n).reshape(-1, 1), test_x], axis=1), tf.float32)
 train_label = tf.constant(train_y.reshape(-1, 1), tf.float32)  # 转为列向量

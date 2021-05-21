@@ -1,5 +1,5 @@
 """
-多元罗辑回归
+二元逻辑回归
 """
 import tensorflow as tf
 import numpy as np
@@ -44,8 +44,10 @@ def plot_class_contourf(x, w):
     _min = np.min(x, axis=0)
     plt.axis([_min[0], _max[0], _min[1], _max[1]])
     m1, m2 = np.meshgrid(np.linspace(_min[0], _max[0], num), np.linspace(_min[1], _max[1], num))
-    # grid_z = grid_x*W
-    # plt.contourf(gridx, gridy, (gridx * w[1] + gridy * w[2] + w[0]), 1, cmap=cm_bg)
+
+    # Wrong with contourf!!
+    # plt.contourf(m1, m2, (m1 * w[1] + m2 * w[2] + w[0]), num, cmap=cm_bg)
+
     mesh_x = tf.cast(np.stack((np.ones(num * num), m1.reshape(-1), m2.reshape(-1)), axis=1), dtype=tf.float32)
     mesh_y = tf.cast(1 / (1 + tf.exp(-tf.matmul(mesh_x, W))), tf.float32)
     mesh_y = tf.where(mesh_y < 0.5, 0, 1)
@@ -61,7 +63,9 @@ axis_min = np.min(train_x, axis=0)
 n = len(train_x)
 
 x0 = np.ones(n).reshape(-1, 1)
-# TODO: why concat?
+# (1, x1, x2) * (w0, w1, w2) = w1*x1 + w2*x2 + w0
+# w1,w2 => 特征系数 => 一元回归中的w
+# w0    => 偏移量   => 一元回归中的b
 X = tf.cast(tf.concat((x0, train_x), axis=1), tf.float32)
 Y = tf.cast(train_y.reshape(-1, 1), tf.float32)
 print(X.shape, Y.shape)
@@ -90,7 +94,7 @@ test_acc = []
 for i in range(epoch + 1):
     with tf.GradientTape() as tape:
         pred = 1 / (1 + tf.exp(-tf.matmul(X, W)))
-        # TODO: Why nagetive
+        # TODO: Why nagetive?
         loss = -tf.reduce_mean(Y * tf.math.log(pred) + (1 - Y) * tf.math.log(1 - pred))
     pred_test = 1 / (1 + tf.exp(-tf.matmul(X_test, W)))
     loss_test = -tf.reduce_mean(Y_test * tf.math.log(pred_test) + (1 - Y_test) * tf.math.log(1 - pred_test))
