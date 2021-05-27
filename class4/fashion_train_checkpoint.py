@@ -5,23 +5,25 @@ import os
 
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from libs.SequentialModel import SequentialMnist
+from libs.SequentialModel import SequentialFashion
 
 # load data
-mnist = tf.keras.datasets.mnist
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
+fashion = tf.keras.datasets.fashion_mnist
+(x_train, y_train), (x_test, y_test) = fashion.load_data()
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
+print(x_test.shape)
+
 # get model
-model = SequentialMnist()
+model = SequentialFashion()
 # compile
 model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
               metrics=['sparse_categorical_accuracy'])
 
 # load weights
-chpt_path = "./checkpoint/mnist_chpt.ckpt"
-save_path = "./checkpoint/mnist_ori.ckpt"
+chpt_path = "./checkpoint/fashion_chpt.ckpt"
+save_path = "./checkpoint/fashion_ori.ckpt"
 if os.path.exists(save_path + '.index'):
     print('-------------load the model-----------------')
     model.load_weights(save_path)

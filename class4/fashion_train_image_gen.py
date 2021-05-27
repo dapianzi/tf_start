@@ -13,8 +13,8 @@ from libs.SequentialModel import SequentialMnist
 np.set_printoptions(threshold=np.inf)
 
 # load data
-mnist = tf.keras.datasets.mnist
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
+fashion = tf.keras.datasets.fashion_mnist
+(x_train, y_train), (x_test, y_test) = fashion.load_data()
 x_train, x_test = x_train / 255.0, x_test / 255.0
 x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)  # 给数据增加一个维度,从(60000, 28, 28)reshape为(60000, 28, 28, 1)
 
@@ -31,12 +31,15 @@ image_gen_train.fit(x_train)
 
 # load model
 model = SequentialMnist()
-
 model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
               metrics=['sparse_categorical_accuracy'])
 
-save_path = './checkpoint/mnist_aug.ckpt'
+save_path = './checkpoint/fashion_aug.ckpt'
+
+cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=save_path,
+                                                 save_weights_only=True,
+                                                 save_best_only=True)  # 只保存最好的模型参数
 
 if os.path.exists(save_path + '.index'):
     model.load_weights(filepath=save_path)
@@ -44,8 +47,7 @@ else:
     # training
     history = model.fit(image_gen_train.flow(x_train, y_train, batch_size=32), epochs=10,
                         validation_data=(x_test, y_test),
-                        validation_freq=1)
-    model.save_weights(filepath=save_path)
+                        validation_freq=1, callbacks=[cp_callback])
 
     # plot
     plt.figure(figsize=(4, 6))
@@ -65,7 +67,7 @@ else:
     plt.show()
 
 print(model.trainable_variables)
-file = open('./weights.txt', 'w')
+file = open('./fashion_weights.txt', 'w')
 for v in model.trainable_variables:
     file.write(str(v.name) + '\n')
     file.write(str(v.shape) + '\n')
