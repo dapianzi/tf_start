@@ -1,11 +1,14 @@
-import tensorflow as tf
 import os
-import numpy as np
-from matplotlib import pyplot as plt
-from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, MaxPool2D, Dropout, Flatten, Dense, \
-    GlobalAveragePooling2D
-from tensorflow.keras import Model
 
+import numpy as np
+import tensorflow as tf
+from matplotlib import pyplot as plt
+from tensorflow.keras import Model
+from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, MaxPool2D, Dense, \
+    GlobalAveragePooling2D
+
+
+os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 np.set_printoptions(threshold=np.inf)
 
 fashion = tf.keras.datasets.fashion_mnist
@@ -27,7 +30,8 @@ class ConvBNRelu(Model):
         ])
 
     def call(self, x):
-        x = self.model(x, training=False) #在training=False时，BN通过整个训练集计算均值、方差去做批归一化，training=True时，通过当前batch的均值、方差去做批归一化。推理时 training=False效果好
+        x = self.model(x,
+                       training=False)  # 在training=False时，BN通过整个训练集计算均值、方差去做批归一化，training=True时，通过当前batch的均值、方差去做批归一化。推理时 training=False效果好
         return x
 
 
@@ -121,13 +125,15 @@ val_acc = history.history['val_sparse_categorical_accuracy']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
-plt.subplot(1, 2, 1)
+plt.figure(figsize=(4, 6))
+
+plt.subplot(2, 1, 1)
 plt.plot(acc, label='Training Accuracy')
 plt.plot(val_acc, label='Validation Accuracy')
 plt.title('Training and Validation Accuracy')
 plt.legend()
 
-plt.subplot(1, 2, 2)
+plt.subplot(2, 1, 2)
 plt.plot(loss, label='Training Loss')
 plt.plot(val_loss, label='Validation Loss')
 plt.title('Training and Validation Loss')

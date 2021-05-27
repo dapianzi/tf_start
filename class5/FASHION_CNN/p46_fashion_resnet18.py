@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, MaxPool2D, Dropout, Flatten, Dense
 from tensorflow.keras import Model
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 np.set_printoptions(threshold=np.inf)
 
 fashion = tf.keras.datasets.fashion_mnist
@@ -124,13 +125,16 @@ val_acc = history.history['val_sparse_categorical_accuracy']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
-plt.subplot(1, 2, 1)
+
+plt.figure(figsize=(4, 6))
+
+plt.subplot(2, 1, 1)
 plt.plot(acc, label='Training Accuracy')
 plt.plot(val_acc, label='Validation Accuracy')
 plt.title('Training and Validation Accuracy')
 plt.legend()
 
-plt.subplot(1, 2, 2)
+plt.subplot(2, 1, 2)
 plt.plot(loss, label='Training Loss')
 plt.plot(val_loss, label='Validation Loss')
 plt.title('Training and Validation Loss')

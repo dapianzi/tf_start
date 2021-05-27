@@ -6,6 +6,7 @@ from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, MaxP
 from tensorflow.keras import Model
 
 np.set_printoptions(threshold=np.inf)
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 fashion = tf.keras.datasets.fashion_mnist
 (x_train, y_train), (x_test, y_test) = fashion.load_data()
@@ -17,6 +18,9 @@ print("x_train.shape", x_train.shape)
 
 
 class LeNet5(Model):
+    """
+    LeNet
+    """
     def __init__(self):
         super(LeNet5, self).__init__()
         self.c1 = Conv2D(filters=6, kernel_size=(5, 5),
@@ -81,13 +85,15 @@ val_acc = history.history['val_sparse_categorical_accuracy']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
-plt.subplot(1, 2, 1)
+plt.figure(figsize=(4, 6))
+
+plt.subplot(2, 1, 1)
 plt.plot(acc, label='Training Accuracy')
 plt.plot(val_acc, label='Validation Accuracy')
 plt.title('Training and Validation Accuracy')
 plt.legend()
 
-plt.subplot(1, 2, 2)
+plt.subplot(2, 1, 2)
 plt.plot(loss, label='Training Loss')
 plt.plot(val_loss, label='Validation Loss')
 plt.title('Training and Validation Loss')
