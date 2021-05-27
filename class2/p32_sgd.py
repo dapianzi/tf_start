@@ -62,10 +62,7 @@ for epoch in range(epoch):  # 数据集级别的循环，每个epoch循环一次
         w1.assign_sub(lr * grads[0])  # 参数w1自更新
         b1.assign_sub(lr * grads[1])  # 参数b自更新
 
-    # 每个epoch，打印loss信息
-    print("Epoch {}, loss: {}".format(epoch, loss_all / 4))
     train_loss_results.append(loss_all / 4)  # 将4个step的loss求平均记录在此变量中
-    loss_all = 0  # loss_all归零，为记录下一个epoch的loss做准备
 
     # 测试部分
     # total_correct为预测对的样本个数, total_number为测试的总样本数，将这两个变量都初始化为0
@@ -88,25 +85,35 @@ for epoch in range(epoch):  # 数据集级别的循环，每个epoch循环一次
     # 总的准确率等于total_correct/total_number
     acc = total_correct / total_number
     test_acc.append(acc)
-    print("Test_acc:", acc)
-    print("--------------------------")
+    # 每个epoch，打印loss信息
+    if epoch % 50 == 0:
+        print("Epoch {}, loss: {}".format(epoch, loss_all / 4))
+        print("Test_acc:", acc)
+        print("--------------------------")
+
+    loss_all = 0  # loss_all归零，为记录下一个epoch的loss做准备
+
 total_time = time.time() - now_time  ##3##
 print("total_time", total_time)  ##4##
 
+plt.figure(figsize=(4, 6))
 # 绘制 loss 曲线
+plt.subplot(211)
 plt.title('Loss Function Curve')  # 图片标题
 plt.xlabel('Epoch')  # x轴变量名称
 plt.ylabel('Loss')  # y轴变量名称
 plt.plot(train_loss_results, label="$Loss$")  # 逐点画出trian_loss_results值并连线，连线图标是Loss
 plt.legend()  # 画出曲线图标
-plt.show()  # 画出图像
 
 # 绘制 Accuracy 曲线
+plt.subplot(212)
 plt.title('Acc Curve')  # 图片标题
 plt.xlabel('Epoch')  # x轴变量名称
 plt.ylabel('Acc')  # y轴变量名称
 plt.plot(test_acc, label="$Accuracy$")  # 逐点画出test_acc值并连线，连线图标是Accuracy
 plt.legend()
+
+plt.tight_layout()
 plt.show()
 
 # 本文件较 class1\p45_iris.py 仅添加四处时间记录  用 ##n## 标识
