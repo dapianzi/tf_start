@@ -5,7 +5,7 @@ from tensorflow.keras import regularizers
 
 class SequentialIris(Model):
     """
-    简单的鸢尾花分类训练模型
+    简单的鸢尾花分类全连接训练模型
     """
     def __init__(self):
         super(SequentialIris, self).__init__()
@@ -19,7 +19,7 @@ class SequentialIris(Model):
 
 class SequentialMnist(Model):
     """
-    简单的mnist分类训练模型
+    简单的mnist分类全连接训练模型
     """
     def __init__(self):
         super(SequentialMnist, self).__init__()
@@ -36,7 +36,7 @@ class SequentialMnist(Model):
 
 class SequentialFashion(Model):
     """
-    简单的fashion分类训练模型
+    简单的fashion分类全连接训练模型
     """
     def __init__(self):
         super(SequentialFashion, self).__init__()
