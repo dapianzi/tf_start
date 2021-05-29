@@ -4,11 +4,17 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, MaxPool2D, Dropout, Flatten, Dense
 from tensorflow.keras import Model
+from utils import *
 
 np.set_printoptions(threshold=np.inf)
 
 fashion = tf.keras.datasets.fashion_mnist
 (x_train, y_train), (x_test, y_test) = fashion.load_data()
+
+x_train = x_train[:TRAIN_SET]
+y_train = y_train[:TRAIN_SET]
+x_test = x_test[:TEST_SET]
+y_test = y_test[:TEST_SET]
 x_train, x_test = x_train / 255.0, x_test / 255.0
 print("x_train.shape", x_train.shape)
 x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)  # 给数据增加一个维度，使数据和网络结构匹配
@@ -19,66 +25,66 @@ print("x_train.shape", x_train.shape)
 class VGG16(Model):
     def __init__(self):
         super(VGG16, self).__init__()
-        self.c1 = Conv2D(filters=64, kernel_size=(3, 3), padding='same')  # 卷积层1
+        self.c1 = Conv2D(filters=64, kernel_size=(3, 3), padding='same')  # 28*28*64
         self.b1 = BatchNormalization()  # BN层1
         self.a1 = Activation('relu')  # 激活层1
-        self.c2 = Conv2D(filters=64, kernel_size=(3, 3), padding='same', )
+        self.c2 = Conv2D(filters=64, kernel_size=(3, 3), padding='same', )  # 28*28*64
         self.b2 = BatchNormalization()  # BN层1
         self.a2 = Activation('relu')  # 激活层1
-        self.p1 = MaxPool2D(pool_size=(2, 2), strides=2, padding='same')
+        self.p1 = MaxPool2D(pool_size=(2, 2), strides=2, padding='same')  # 14*14*64
         self.d1 = Dropout(0.2)  # dropout层
 
-        self.c3 = Conv2D(filters=128, kernel_size=(3, 3), padding='same')
+        self.c3 = Conv2D(filters=128, kernel_size=(3, 3), padding='same')  # 14*14*128
         self.b3 = BatchNormalization()  # BN层1
         self.a3 = Activation('relu')  # 激活层1
-        self.c4 = Conv2D(filters=128, kernel_size=(3, 3), padding='same')
+        self.c4 = Conv2D(filters=128, kernel_size=(3, 3), padding='same')  # 14*14*128
         self.b4 = BatchNormalization()  # BN层1
         self.a4 = Activation('relu')  # 激活层1
-        self.p2 = MaxPool2D(pool_size=(2, 2), strides=2, padding='same')
+        self.p2 = MaxPool2D(pool_size=(2, 2), strides=2, padding='same')  # 7*7*128
         self.d2 = Dropout(0.2)  # dropout层
 
-        self.c5 = Conv2D(filters=256, kernel_size=(3, 3), padding='same')
+        self.c5 = Conv2D(filters=256, kernel_size=(3, 3), padding='same')  # 7*7*256
         self.b5 = BatchNormalization()  # BN层1
         self.a5 = Activation('relu')  # 激活层1
-        self.c6 = Conv2D(filters=256, kernel_size=(3, 3), padding='same')
+        self.c6 = Conv2D(filters=256, kernel_size=(3, 3), padding='same')  # 7*7*256
         self.b6 = BatchNormalization()  # BN层1
         self.a6 = Activation('relu')  # 激活层1
-        self.c7 = Conv2D(filters=256, kernel_size=(3, 3), padding='same')
+        self.c7 = Conv2D(filters=256, kernel_size=(3, 3), padding='same')  # 7*7*256
         self.b7 = BatchNormalization()
         self.a7 = Activation('relu')
-        self.p3 = MaxPool2D(pool_size=(2, 2), strides=2, padding='same')
+        self.p3 = MaxPool2D(pool_size=(2, 2), strides=2, padding='same')  # 4*4*256
         self.d3 = Dropout(0.2)
 
-        self.c8 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')
+        self.c8 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')  # 4*4*512
         self.b8 = BatchNormalization()  # BN层1
         self.a8 = Activation('relu')  # 激活层1
-        self.c9 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')
+        self.c9 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')  # 4*4*512
         self.b9 = BatchNormalization()  # BN层1
         self.a9 = Activation('relu')  # 激活层1
-        self.c10 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')
+        self.c10 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')  # 4*4*512
         self.b10 = BatchNormalization()
         self.a10 = Activation('relu')
-        self.p4 = MaxPool2D(pool_size=(2, 2), strides=2, padding='same')
+        self.p4 = MaxPool2D(pool_size=(2, 2), strides=2, padding='same')  # 2*2*512
         self.d4 = Dropout(0.2)
 
-        self.c11 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')
+        self.c11 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')  # 2*2*512
         self.b11 = BatchNormalization()  # BN层1
         self.a11 = Activation('relu')  # 激活层1
-        self.c12 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')
+        self.c12 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')  # 2*2*512
         self.b12 = BatchNormalization()  # BN层1
         self.a12 = Activation('relu')  # 激活层1
-        self.c13 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')
+        self.c13 = Conv2D(filters=512, kernel_size=(3, 3), padding='same')  # 2*2*512
         self.b13 = BatchNormalization()
         self.a13 = Activation('relu')
-        self.p5 = MaxPool2D(pool_size=(2, 2), strides=2, padding='same')
+        self.p5 = MaxPool2D(pool_size=(2, 2), strides=2, padding='same')  # 1*1*512
         self.d5 = Dropout(0.2)
 
         self.flatten = Flatten()
-        self.f1 = Dense(512, activation='relu')
+        self.f1 = Dense(512, activation='relu')  # 512
         self.d6 = Dropout(0.2)
-        self.f2 = Dense(512, activation='relu')
+        self.f2 = Dense(512, activation='relu')  # 512
         self.d7 = Dropout(0.2)
-        self.f3 = Dense(10, activation='softmax')
+        self.f3 = Dense(10, activation='softmax')  # 10
 
     def call(self, x):
         x = self.c1(x)
@@ -163,31 +169,86 @@ history = model.fit(x_train, y_train, batch_size=32, epochs=5, validation_data=(
                     callbacks=[cp_callback])
 model.summary()
 
+print("""model total params should be :
+Conv2D 1: %d,
+BN 1: %d,
+Conv2D 2: %d,
+BN 2: %d,
+===================
+Conv2D 1: %d,
+BN 1: %d,
+Conv2D 2: %d,
+BN 2: %d,
+===================
+Conv2D 3: %d,
+BN 2: %d,
+Conv2D 4: %d,
+BN 2: %d,
+Conv2D 5: %d,
+BN 2: %d,
+===================
+Conv2D 2: %d,
+BN 2: %d,
+Conv2D 3: %d,
+BN 2: %d,
+Conv2D 4: %d,
+BN 2: %d,
+===================
+Conv2D 2: %d,
+BN 2: %d,
+Conv2D 3: %d,
+BN 2: %d,
+Conv2D 4: %d,
+BN 2: %d,
+===================
+Dense 1: %d,
+Dense 2: %d,
+Dense 3: %d.
+""" % (
+    64 * 3 * 3 + 64,
+    4 * 64,
+    64 * 3 * 3 * 64 + 64,
+    4 * 64,
+
+    64 * 3 * 3 * 128 + 128,
+    128 * 4,
+    128 * 3 * 3 * 128 + 128,
+    128 * 4,
+
+    128 * 3 * 3 * 256 + 256,
+    256 * 4,
+    256 * 3 * 3 * 256 + 256,
+    256 * 4,
+    256 * 3 * 3 * 256 + 256,
+    256 * 4,
+
+    256 * 3 * 3 * 512 + 512,
+    512 * 4,
+    512 * 3 * 3 * 512 + 512,
+    512 * 4,
+    512 * 3 * 3 * 512 + 512,
+    512 * 4,
+
+    512 * 3 * 3 * 512 + 512,
+    512 * 4,
+    512 * 3 * 3 * 512 + 512,
+    512 * 4,
+    512 * 3 * 3 * 512 + 512,
+    512 * 4,
+
+    512 * 512 + 512,
+    512 * 512 + 512,
+    512 * 10 + 10
+))
 # print(model.trainable_variables)
-file = open('./weights.txt', 'w')
-for v in model.trainable_variables:
-    file.write(str(v.name) + '\n')
-    file.write(str(v.shape) + '\n')
-    file.write(str(v.numpy()) + '\n')
-file.close()
+# file = open('./weights.txt', 'w')
+# for v in model.trainable_variables:
+#     file.write(str(v.name) + '\n')
+#     file.write(str(v.shape) + '\n')
+#     file.write(str(v.numpy()) + '\n')
+# file.close()
 
 ###############################################    show   ###############################################
 
 # 显示训练集和验证集的acc和loss曲线
-acc = history.history['sparse_categorical_accuracy']
-val_acc = history.history['val_sparse_categorical_accuracy']
-loss = history.history['loss']
-val_loss = history.history['val_loss']
-
-plt.subplot(1, 2, 1)
-plt.plot(acc, label='Training Accuracy')
-plt.plot(val_acc, label='Validation Accuracy')
-plt.title('Training and Validation Accuracy')
-plt.legend()
-
-plt.subplot(1, 2, 2)
-plt.plot(loss, label='Training Loss')
-plt.plot(val_loss, label='Validation Loss')
-plt.title('Training and Validation Loss')
-plt.legend()
-plt.show()
+plot_history(history)

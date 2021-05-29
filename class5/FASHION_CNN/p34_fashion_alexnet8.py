@@ -4,11 +4,16 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, MaxPool2D, Dropout, Flatten, Dense
 from tensorflow.keras import Model
+from utils import *
 
 np.set_printoptions(threshold=np.inf)
 
 fashion = tf.keras.datasets.fashion_mnist
 (x_train, y_train), (x_test, y_test) = fashion.load_data()
+x_train = x_train[:TRAIN_SET]
+y_train = y_train[:TRAIN_SET]
+x_test = x_test[:TEST_SET]
+y_test = y_test[:TEST_SET]
 x_train, x_test = x_train / 255.0, x_test / 255.0
 print("x_train.shape", x_train.shape)
 x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)  # 给数据增加一个维度，使数据和网络结构匹配
@@ -22,22 +27,22 @@ class AlexNet8(Model):
         self.c1 = Conv2D(filters=96, kernel_size=(3, 3))
         self.b1 = BatchNormalization()
         self.a1 = Activation('relu')
-        self.p1 = MaxPool2D(pool_size=(3, 3), strides=2)
+        self.p1 = MaxPool2D(pool_size=(3, 3), strides=2)  # 26-2/2 = 12
 
-        self.c2 = Conv2D(filters=256, kernel_size=(3, 3))
+        self.c2 = Conv2D(filters=256, kernel_size=(3, 3))  # 12-2 = 10*10*256
         self.b2 = BatchNormalization()
         self.a2 = Activation('relu')
-        self.p2 = MaxPool2D(pool_size=(3, 3), strides=2)
-
+        self.p2 = MaxPool2D(pool_size=(3, 3), strides=2)  # 10-2/2 = 4*4*256
+        # 4*4*384
         self.c3 = Conv2D(filters=384, kernel_size=(3, 3), padding='same',
                          activation='relu')
-
+        # 4*4*384
         self.c4 = Conv2D(filters=384, kernel_size=(3, 3), padding='same',
                          activation='relu')
-
+        # 4*4*256
         self.c5 = Conv2D(filters=256, kernel_size=(3, 3), padding='same',
                          activation='relu')
-        self.p3 = MaxPool2D(pool_size=(3, 3), strides=2)
+        self.p3 = MaxPool2D(pool_size=(3, 3), strides=2)  # 1*1*256
 
         self.flatten = Flatten()
         self.f1 = Dense(2048, activation='relu')
@@ -88,35 +93,42 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_save_path,
                                                  save_weights_only=True,
                                                  save_best_only=True)
 
-history = model.fit(x_train, y_train, batch_size=32, epochs=5, validation_data=(x_test, y_test), validation_freq=1,
+history = model.fit(x_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCH, validation_data=(x_test, y_test),
+                    validation_freq=1,
                     callbacks=[cp_callback])
 model.summary()
 
+print("""model total params should be :
+Conv2D 1: %d,
+BN 1: %d,
+Conv2D 2: %d,
+BN 1: %d,
+Conv2D 3: %d,
+Conv2D 4: %d,
+Conv2D 5: %d,
+Dense 1: %d,
+Dense 2: %d,
+Dense 3: %d.
+""" % (
+    96 * 3 * 3 + 96,
+    4 * 96,
+    256 * 3 * 3 * 96 + 256,
+    4 * 256,
+    256 * 3 * 3 * 384 + 384,
+    384 * 3 * 3 * 384 + 384,
+    384 * 3 * 3 * 256 + 256,
+    256 * 2048 + 2048,
+    2048 * 2048 + 2048,
+    2048 * 10 + 10
+))
 # print(model.trainable_variables)
 file = open('./weights.txt', 'w')
-for v in model.trainable_variables:
-    file.write(str(v.name) + '\n')
-    file.write(str(v.shape) + '\n')
-    file.write(str(v.numpy()) + '\n')
-file.close()
+# for v in model.trainable_variables:
+#     file.write(str(v.name) + '\n')
+#     file.write(str(v.shape) + '\n')
+#     file.write(str(v.numpy()) + '\n')
+# file.close()
 
 ###############################################    show   ###############################################
 
 # 显示训练集和验证集的acc和loss曲线
-acc = history.history['sparse_categorical_accuracy']
-val_acc = history.history['val_sparse_categorical_accuracy']
-loss = history.history['loss']
-val_loss = history.history['val_loss']
-
-plt.subplot(1, 2, 1)
-plt.plot(acc, label='Training Accuracy')
-plt.plot(val_acc, label='Validation Accuracy')
-plt.title('Training and Validation Accuracy')
-plt.legend()
-
-plt.subplot(1, 2, 2)
-plt.plot(loss, label='Training Loss')
-plt.plot(val_loss, label='Validation Loss')
-plt.title('Training and Validation Loss')
-plt.legend()
-plt.show()
