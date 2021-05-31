@@ -1,10 +1,9 @@
-import tensorflow as tf
 import os
-import numpy as np
-from matplotlib import pyplot as plt
-from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, MaxPool2D, Dropout, Flatten, Dense, \
-    GlobalAveragePooling2D
+
 from tensorflow.keras import Model
+from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, MaxPool2D, Dense, \
+    GlobalAveragePooling2D
+
 from utils import *
 
 np.set_printoptions(threshold=np.inf)
@@ -59,6 +58,7 @@ class InceptionBlk(Model):
         x4_1 = self.p4_1(x)
         x4_2 = self.c4_2(x4_1)
         # concat along axis=channel
+        # !! concat, not add
         x = tf.concat([x1, x2_2, x3_2, x4_2], axis=3)
         return x
 
@@ -111,11 +111,130 @@ history = model.fit(x_train, y_train, batch_size=32, epochs=5, validation_data=(
                     callbacks=[cp_callback])
 model.summary()
 
-# TODO
-
 print("""model total params should be :
-TO BE CONTINUED
-"""
+###### 1 ######
+Conv2d: 3*3*16+16=%d
+BN: 16*4=%d
+out: 28*28*16
+-----------------------------------------------------------
+###### 2*2 ######
+###### 2.1 InceptionBlk strides=2 #####
+in : [28, 28, 16], filters=16
+Conv2D 1: 16*1*1*16+16=%d
+Conv2D 2_1: 16*1*1*16+16=%d
+Conv2D 2_2: 16*3*3*16+16=%d
+Conv2D 3_1: 16*1*1*16+16=%d
+Conv2D 3_2: 16*5*5*16+16=%d
+MaxPooling : [28, 28, 16] 
+Conv2D 4: 16*1*1*16+16=%d
+BN*6: 16*4*6=%d 
+out : [14, 14, 64] (with concat)
+-----------------------------------------------------------
+###### 2.2 InceptionBlk strides=1 ######
+in: [14, 14, 64], filters=16
+Conv2D 1: 64*1*1*16+16=%d
+Conv2D 2_1: 64*1*1*16+16=%d
+Conv2D 2_2: 16*3*3*16+16=%d
+Conv2D 3_1: 64*1*1*16+16=%d
+Conv2D 3_2: 16*5*5*16+16=%d
+MaxPooling : [28, 28, 16] 
+Conv2D 4: 64*1*1*16+16=%d 
+BN*6: 16*4*6=%d
+out : [14, 14, 64]
+-----------------------------------------------------------
+###### 2.3 InceptionBlk strides=2 ######
+in: [14, 14, 64], filters=32
+Conv2D 1: 64*1*1*32+32=%d
+Conv2D 2_1: 64*1*1*32+32=%d
+Conv2D 2_2: 32*3*3*32+32=%d
+Conv2D 3_1: 64*1*1*32+32=%d
+Conv2D 3_2: 32*5*5*32+32=%d
+MaxPooling : [7, 7, 32] 
+Conv2D 4: 64*1*1*32+32=%d 
+BN*6: 32*4*6=%d
+out : [7, 7, 128]
+-----------------------------------------------------------
+###### 2.4 InceptionBlk strides=1 ######
+in: [7, 7, 128], filters=32
+Conv2D 1: 128*1*1*32+32=%d
+Conv2D 2_1: 128*1*1*32+32=%d
+Conv2D 2_2: 32*3*3*32+32=%d
+Conv2D 3_1: 128*1*1*32+32=%d
+Conv2D 3_2: 32*5*5*32+32=%d
+MaxPooling : [7, 7, 32] 
+Conv2D 4: 128*1*1*32+32=%d 
+BN*6: 32*4*6=%d
+out : [7, 7, 128]
+-----------------------------------------------------------
+total: %d
+-----------------------------------------------------------
+###### 3. Dense ######
+in: [7, 7, 128]
+AvgPooling: [1, 1, 128]
+Dense: 128*10+10=%d
+""" % (
+    3 * 3 * 16 + 16,
+    16 * 4,
+    16 * 1 * 1 * 16 + 16,
+    16 * 1 * 1 * 16 + 16,
+    16 * 3 * 3 * 16 + 16,
+    16 * 1 * 1 * 16 + 16,
+    16 * 5 * 5 * 16 + 16,
+    16 * 1 * 1 * 16 + 16,
+    16 * 4 * 6,
+    64 * 1 * 1 * 16 + 16,
+    64 * 1 * 1 * 16 + 16,
+    16 * 3 * 3 * 16 + 16,
+    64 * 1 * 1 * 16 + 16,
+    16 * 5 * 5 * 16 + 16,
+    64 * 1 * 1 * 16 + 16,
+    16 * 4 * 6,
+    64 * 1 * 1 * 32 + 32,
+    64 * 1 * 1 * 32 + 32,
+    32 * 3 * 3 * 32 + 32,
+    64 * 1 * 1 * 32 + 32,
+    32 * 5 * 5 * 32 + 32,
+    64 * 1 * 1 * 32 + 32,
+    32 * 4 * 6,
+    128 * 1 * 1 * 32 + 32,
+    128 * 1 * 1 * 32 + 32,
+    32 * 3 * 3 * 32 + 32,
+    128 * 1 * 1 * 32 + 32,
+    32 * 5 * 5 * 32 + 32,
+    128 * 1 * 1 * 32 + 32,
+    32 * 4 * 6,
+    np.sum(np.array([
+        16 * 1 * 1 * 16 + 16,
+        16 * 1 * 1 * 16 + 16,
+        16 * 3 * 3 * 16 + 16,
+        16 * 1 * 1 * 16 + 16,
+        16 * 5 * 5 * 16 + 16,
+        16 * 1 * 1 * 16 + 16,
+        16 * 4 * 6,
+        64 * 1 * 1 * 16 + 16,
+        64 * 1 * 1 * 16 + 16,
+        16 * 3 * 3 * 16 + 16,
+        64 * 1 * 1 * 16 + 16,
+        16 * 5 * 5 * 16 + 16,
+        64 * 1 * 1 * 16 + 16,
+        16 * 4 * 6,
+        64 * 1 * 1 * 32 + 32,
+        64 * 1 * 1 * 32 + 32,
+        32 * 3 * 3 * 32 + 32,
+        64 * 1 * 1 * 32 + 32,
+        32 * 5 * 5 * 32 + 32,
+        64 * 1 * 1 * 32 + 32,
+        32 * 4 * 6,
+        128 * 1 * 1 * 32 + 32,
+        128 * 1 * 1 * 32 + 32,
+        32 * 3 * 3 * 32 + 32,
+        128 * 1 * 1 * 32 + 32,
+        32 * 5 * 5 * 32 + 32,
+        128 * 1 * 1 * 32 + 32,
+        32 * 4 * 6
+    ])).item(),
+    128 * 10 + 10
+)
       )
 # print(model.trainable_variables)
 # file = open('./weights.txt', 'w')

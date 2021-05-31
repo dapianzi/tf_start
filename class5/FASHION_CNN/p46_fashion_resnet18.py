@@ -1,9 +1,8 @@
-import tensorflow as tf
 import os
-import numpy as np
-from matplotlib import pyplot as plt
-from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, MaxPool2D, Dropout, Flatten, Dense
+
 from tensorflow.keras import Model
+from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation
+
 from utils import *
 
 np.set_printoptions(threshold=np.inf)
@@ -115,21 +114,105 @@ history = model.fit(x_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCH, valid
                     callbacks=[cp_callback])
 model.summary()
 
-# TODO
-
 print("""model total params should be :
-TO BE CONTINUED
-"""
+###### 1 ######
+3*3*64=%d
+64*4=%d
+out: 28*28*64
+-----------------------------------------------------------
+###### Block 2.1 ######
+上轮输出深度d=64,本轮卷积核f=64
+Conv2d 1: d*3*3*f
+Conv2D 2: f*3*3*f
+BN*2: f*4*2
+sum=%d
+上轮输出深度d=64,本轮卷积核f=64
+Conv2d 1: d*3*3*f
+Conv2d 2: f*3*3*f
+BN*2: f2*4*2
+sum=%d
+out shape: [28,28,64]
+-----------------------------------------------------------
+###### Block 2.2 ######
+上轮输出深度d=64,本轮卷积核f=128
+Conv2d 1: d*3*3*f
+Conv2D 2: f*3*3*f
+Conv2D 3: d*1*1*f
+BN*3: f*4*3
+sum=%d
+上轮输出深度d=128,本轮卷积核f=128
+Conv2d 1: d*3*3*f
+Conv2d 2: f*3*3*f
+BN*2: f2*4*2
+sum=%d
+out shape: [14,14,128]
+-----------------------------------------------------------
+###### Block 2.3 ######
+上轮输出深度d=128,本轮卷积核f=256
+Conv2d 1: d*3*3*f
+Conv2D 2: f*3*3*f
+Conv2D 3: d*1*1*f
+BN*3: f*4*3
+sum=%d
+上轮输出深度d=256,本轮卷积核f=256
+Conv2d 1: d*3*3*f
+Conv2d 2: f*3*3*f
+BN*2: f2*4*2
+sum=%d
+out shape: [7,7,256]
+-----------------------------------------------------------
+###### Block 2.4 ######
+上轮输出深度d=256,本轮卷积核f=512
+Conv2d 1: d*3*3*f
+Conv2D 2: f*3*3*f
+Conv2D 3: d*1*1*f
+BN*3: f*4*3
+sum=%d
+上轮输出深度d=512,本轮卷积核f=512
+Conv2d 1: d*3*3*f
+Conv2d 2: f*3*3*f
+BN*2: f2*4*2
+sum=%d
+out shape: [4,4,512]
+###### 2.total ######
+total all: %d
+-----------------------------------------------------------
+###### 3 ######
+Pooling out: [1,1,512]
+Dense: 512*10+10=%d
+""" % (
+    3 * 3 * 64,
+    64 * 4,
+    64 * 64 * 9 + 9 * 64 * 64 + 8 * 64,
+    64 * 64 * 9 + 64 * 64 * 9 + 64 * 8,
+    128 * 64 * 10 + 9 * 128 * 128 + 12 * 128,
+    128 * 128 * 9 + 128 * 128 * 9 + 128 * 8,
+    256 * 128 * 10 + 9 * 256 * 256 + 12 * 256,
+    256 * 256 * 9 + 256 * 256 * 9 + 256 * 8,
+    512 * 256 * 10 + 9 * 512 * 512 + 12 * 512,
+    512 * 512 * 9 + 512 * 512 * 9 + 512 * 8,
+    np.sum(np.array([
+        64 * 64 * 9 + 9 * 64 * 64 + 8 * 64,
+        64 * 64 * 9 + 64 * 64 * 9 + 64 * 8,
+        128 * 64 * 10 + 9 * 128 * 128 + 12 * 128,
+        128 * 128 * 9 + 128 * 128 * 9 + 128 * 8,
+        256 * 128 * 10 + 9 * 256 * 256 + 12 * 256,
+        256 * 256 * 9 + 256 * 256 * 9 + 256 * 8,
+        512 * 256 * 10 + 9 * 512 * 512 + 12 * 512,
+        512 * 512 * 9 + 512 * 512 * 9 + 512 * 8,
+    ])).item(),
+    512 * 10 + 10,
+)
       )
 # print(model.trainable_variables)
-file = open('./weights.txt', 'w')
+# file = open('./weights.txt', 'w')
 # for v in model.trainable_variables:
 #     file.write(str(v.name) + '\n')
 #     file.write(str(v.shape) + '\n')
 #     file.write(str(v.numpy()) + '\n')
 # file.close()
 
-###############################################    show   ###############################################
+############################################################################################    show   ############################################################################################
 
 # 显示训练集和验证集的acc和loss曲线
 plot_history(history)
