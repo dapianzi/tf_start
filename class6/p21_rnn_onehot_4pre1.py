@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, SimpleRNN
+from tensorflow.keras.layers import Dense, SimpleRNN, Embedding
 import matplotlib.pyplot as plt
 import os
 
@@ -83,6 +83,10 @@ plt.show()
 preNum = int(input("input the number of test alphabet:"))
 for i in range(preNum):
     alphabet1 = input("input test alphabet:")
+    if len(alphabet1) != 4:
+        print('alphabet must be 4 characters')
+        i = i-1
+        continue
     alphabet = [id_to_onehot[w_to_id[a]] for a in alphabet1]
     # 使alphabet符合SimpleRNN输入要求：[送入样本数， 循环核时间展开步数， 每个时间步输入特征个数]。此处验证效果送入了1个样本，送入样本数为1；输入4个字母出结果，所以循环核时间展开步数为4; 表示为独热码有5个输入特征，每个时间步输入特征个数为5
     alphabet = np.reshape(alphabet, (1, 4, 5))

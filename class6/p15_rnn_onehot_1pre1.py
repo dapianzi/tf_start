@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Dense, SimpleRNN
 import matplotlib.pyplot as plt
 import os
+from utils import *
 
 input_word = "abcde"
 w_to_id = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4}  # 单词映射到数值id的词典
@@ -35,7 +36,7 @@ model.compile(optimizer=tf.keras.optimizers.Adam(0.01),
 
 checkpoint_save_path = "./checkpoint/rnn_onehot_1pre1.ckpt"
 
-if os.path.exists(checkpoint_save_path + '.index'):
+if False and os.path.exists(checkpoint_save_path + '.index'):
     print('-------------load the model-----------------')
     model.load_weights(checkpoint_save_path)
 
@@ -59,18 +60,22 @@ file.close()
 ###############################################    show   ###############################################
 
 # 显示训练集和验证集的acc和loss曲线
+
 acc = history.history['sparse_categorical_accuracy']
 loss = history.history['loss']
 
-plt.subplot(1, 2, 1)
+plt.figure(figsize=(4, 6))
+plt.subplot(2, 1, 1)
 plt.plot(acc, label='Training Accuracy')
-plt.title('Training Accuracy')
+plt.title('Training and Validation Accuracy')
 plt.legend()
 
-plt.subplot(1, 2, 2)
+plt.subplot(2, 1, 2)
 plt.plot(loss, label='Training Loss')
-plt.title('Training Loss')
+plt.title('Training and Validation Loss')
 plt.legend()
+
+plt.tight_layout()
 plt.show()
 
 ############### predict #############

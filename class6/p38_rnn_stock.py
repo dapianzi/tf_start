@@ -10,8 +10,8 @@ import math
 
 maotai = pd.read_csv('./SH600519.csv')  # 读取股票文件
 
-training_set = maotai.iloc[0:2426 - 300, 2:3].values  # 前(2426-300=2126)天的开盘价作为训练集,表格从0开始计数，2:3 是提取[2:3)列，前闭后开,故提取出C列开盘价
-test_set = maotai.iloc[2426 - 300:, 2:3].values  # 后300天的开盘价作为测试集
+training_set = maotai.iloc[0:-300, 2:3].values  # 前(2426-300=2126)天的开盘价作为训练集,表格从0开始计数，提取出C列开盘价
+test_set = maotai.iloc[-300:, 2:3].values  # 后300天的开盘价作为测试集
 
 # 归一化
 sc = MinMaxScaler(feature_range=(0, 1))  # 定义归一化：归一化到(0，1)之间
@@ -27,8 +27,9 @@ y_test = []
 # 测试集：csv表格中前2426-300=2126天数据
 # 利用for循环，遍历整个训练集，提取训练集中连续60天的开盘价作为输入特征x_train，第61天的数据作为标签，for循环共构建2426-300-60=2066组数据。
 for i in range(60, len(training_set_scaled)):
-    x_train.append(training_set_scaled[i - 60:i, 0])
-    y_train.append(training_set_scaled[i, 0])
+    x_train.append(training_set_scaled[i - 60:i, 0])    # 连续60天的开盘价
+    y_train.append(training_set_scaled[i, 0])           # 第61天的开盘价
+
 # 对训练集进行打乱
 np.random.seed(7)
 np.random.shuffle(x_train)
@@ -78,6 +79,29 @@ history = model.fit(x_train, y_train, batch_size=64, epochs=50, validation_data=
 
 model.summary()
 
+print("""
+model params should be:
+=========================================
+RNN 1: 
+    w_xh    [1, 80]     1*80 = 80
+    w_hh    [80, 80]    80*80 = 6400
+    w_hy    [80, 1]     80*1 = 80
+----------------------------------
+    total   6560
+    shape   [80, 1]
+=========================================
+RNN 2: 
+    w_xh    [80, 100]     80*100 = 8000
+    w_hh    [100, 100]    100*100 = 10000
+    w_hy    [100, 1]     100*1 = 100
+----------------------------------
+    total   18100
+    shape   [100, 1]
+=========================================
+Dense:
+    100 * 1 + 1 = 101        
+""")
+
 file = open('./weights.txt', 'w')  # 参数提取
 for v in model.trainable_variables:
     file.write(str(v.name) + '\n')
@@ -88,11 +112,13 @@ file.close()
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
+plt.figure(figsize=(4, 6))
+plt.suptitle('RNN stock')
+plt.subplot(211)
 plt.plot(loss, label='Training Loss')
 plt.plot(val_loss, label='Validation Loss')
 plt.title('Training and Validation Loss')
 plt.legend()
-plt.show()
 
 ################## predict ######################
 # 测试集输入模型进行预测
@@ -102,12 +128,15 @@ predicted_stock_price = sc.inverse_transform(predicted_stock_price)
 # 对真实数据还原---从（0，1）反归一化到原始范围
 real_stock_price = sc.inverse_transform(test_set[60:])
 # 画出真实数据和预测数据的对比曲线
+plt.subplot(212)
 plt.plot(real_stock_price, color='red', label='MaoTai Stock Price')
 plt.plot(predicted_stock_price, color='blue', label='Predicted MaoTai Stock Price')
 plt.title('MaoTai Stock Price Prediction')
 plt.xlabel('Time')
 plt.ylabel('MaoTai Stock Price')
 plt.legend()
+
+plt.tight_layout()
 plt.show()
 
 ##########evaluate##############

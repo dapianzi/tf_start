@@ -1,19 +1,15 @@
+import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, SimpleRNN, Embedding
-import matplotlib.pyplot as plt
-import os
 
 input_word = "abcdefghijklmnopqrstuvwxyz"
-w_to_id = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4,
-           'f': 5, 'g': 6, 'h': 7, 'i': 8, 'j': 9,
-           'k': 10, 'l': 11, 'm': 12, 'n': 13, 'o': 14,
-           'p': 15, 'q': 16, 'r': 17, 's': 18, 't': 19,
-           'u': 20, 'v': 21, 'w': 22, 'x': 23, 'y': 24, 'z': 25}  # 单词映射到数值id的词典
 
-training_set_scaled = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                       11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                       21, 22, 23, 24, 25]
+training_set_scaled = range(0, 26)
+
+w_to_id = dict(zip(list(input_word), training_set_scaled))
 
 x_train = []
 y_train = []
@@ -45,7 +41,7 @@ model.compile(optimizer=tf.keras.optimizers.Adam(0.01),
 
 checkpoint_save_path = "./checkpoint/rnn_embedding_4pre1.ckpt"
 
-if os.path.exists(checkpoint_save_path + '.index'):
+if False and os.path.exists(checkpoint_save_path + '.index'):
     print('-------------load the model-----------------')
     model.load_weights(checkpoint_save_path)
 
@@ -58,6 +54,23 @@ history = model.fit(x_train, y_train, batch_size=32, epochs=100, callbacks=[cp_c
 
 model.summary()
 
+print("""
+model params should be:
+1. Embedding: 
+    x       [26, 2]     26*2 = 52
+=========================================
+2. RNN: 
+    w_xh    [2, 10]     2*10 = 20
+    w_hh    [10, 10]    10*10 = 100
+    w_hy    [10, 1]     10*1 = 10
+----------------------------------
+    total   130
+    shape   [10, 1]
+=========================================
+3. Dense:
+    10 * 26 + 26 = 286        
+""")
+
 file = open('./weights.txt', 'w')  # 参数提取
 for v in model.trainable_variables:
     file.write(str(v.name) + '\n')
@@ -65,28 +78,33 @@ for v in model.trainable_variables:
     file.write(str(v.numpy()) + '\n')
 file.close()
 
-###############################################    show   ###############################################
-
 # 显示训练集和验证集的acc和loss曲线
 acc = history.history['sparse_categorical_accuracy']
 loss = history.history['loss']
 
-plt.subplot(1, 2, 1)
+plt.figure(figsize=(4, 6))
+plt.subplot(2, 1, 1)
 plt.plot(acc, label='Training Accuracy')
 plt.title('Training Accuracy')
 plt.legend()
 
-plt.subplot(1, 2, 2)
+plt.subplot(2, 1, 2)
 plt.plot(loss, label='Training Loss')
 plt.title('Training Loss')
 plt.legend()
+
+plt.tight_layout()
 plt.show()
 
 ################# predict ##################
 
 preNum = int(input("input the number of test alphabet:"))
-for i in range(preNum):
+i = preNum
+while i > 0:
     alphabet1 = input("input test alphabet:")
+    if len(alphabet1) != 4:
+        tf.print('Error: alphabet must be 4 characters!')
+        continue
     alphabet = [w_to_id[a] for a in alphabet1]
     # 使alphabet符合Embedding输入要求：[送入样本数， 时间展开步数]。
     # 此处验证效果送入了1个样本，送入样本数为1；输入4个字母出结果，循环核时间展开步数为4。
@@ -95,3 +113,6 @@ for i in range(preNum):
     pred = tf.argmax(result, axis=1)
     pred = int(pred)
     tf.print(alphabet1 + '->' + input_word[pred])
+    i = i - 1
+
+print('Done!!')

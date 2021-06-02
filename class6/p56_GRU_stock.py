@@ -10,8 +10,8 @@ import math
 
 maotai = pd.read_csv('./SH600519.csv')  # 读取股票文件
 
-training_set = maotai.iloc[0:2426 - 300, 2:3].values  # 前(2426-300=2126)天的开盘价作为训练集,表格从0开始计数，2:3 是提取[2:3)列，前闭后开,故提取出C列开盘价
-test_set = maotai.iloc[2426 - 300:, 2:3].values  # 后300天的开盘价作为测试集
+training_set = maotai.iloc[0:-300, 2:3].values  # 前(2426-300=2126)天的开盘价作为训练集,表格从0开始计数，2:3 是提取[2:3)列，前闭后开,故提取出C列开盘价
+test_set = maotai.iloc[-300:, 2:3].values  # 后300天的开盘价作为测试集
 
 # 归一化
 sc = MinMaxScaler(feature_range=(0, 1))  # 定义归一化：归一化到(0，1)之间
@@ -78,6 +78,28 @@ history = model.fit(x_train, y_train, batch_size=64, epochs=50, validation_data=
 
 model.summary()
 
+# TODO 参数数量?
+print("""
+model params should be:
+=========================================
+LSTM 1: 
+    W_i     [80, 80+1]      80*81 = 6480
+    b_i     [80, 1]         80*1 = 80
+----------------------------------
+    total   6560*3 = 19680
+    shape   [80, 1]
+=========================================
+LSTM 2: 
+    W_i     [100, 100+80]   100*180 = 18000
+    b_i     [100, 1]        100*1 = 100
+----------------------------------
+    total   18100 * 3 = 54300
+    shape   [100, 1]
+=========================================
+Dense:
+    100 * 1 + 1 = 101
+""")
+
 file = open('./weights.txt', 'w')  # 参数提取
 for v in model.trainable_variables:
     file.write(str(v.name) + '\n')
@@ -88,11 +110,13 @@ file.close()
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
+plt.figure(figsize=(4, 6))
+plt.suptitle('GRU stock')
+plt.subplot(211)
 plt.plot(loss, label='Training Loss')
 plt.plot(val_loss, label='Validation Loss')
 plt.title('Training and Validation Loss')
 plt.legend()
-plt.show()
 
 ################## predict ######################
 # 测试集输入模型进行预测
@@ -102,12 +126,15 @@ predicted_stock_price = sc.inverse_transform(predicted_stock_price)
 # 对真实数据还原---从（0，1）反归一化到原始范围
 real_stock_price = sc.inverse_transform(test_set[60:])
 # 画出真实数据和预测数据的对比曲线
+plt.subplot(212)
 plt.plot(real_stock_price, color='red', label='MaoTai Stock Price')
 plt.plot(predicted_stock_price, color='blue', label='Predicted MaoTai Stock Price')
 plt.title('MaoTai Stock Price Prediction')
 plt.xlabel('Time')
 plt.ylabel('MaoTai Stock Price')
 plt.legend()
+
+plt.tight_layout()
 plt.show()
 
 ##########evaluate##############

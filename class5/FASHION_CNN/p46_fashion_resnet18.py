@@ -9,10 +9,10 @@ np.set_printoptions(threshold=np.inf)
 
 fashion = tf.keras.datasets.fashion_mnist
 (x_train, y_train), (x_test, y_test) = fashion.load_data()
-x_train = x_train[:TRAIN_SET]
-y_train = y_train[:TRAIN_SET]
-x_test = x_test[:TEST_SET]
-y_test = y_test[:TEST_SET]
+# x_train = x_train[:TRAIN_SET]
+# y_train = y_train[:TRAIN_SET]
+# x_test = x_test[:TEST_SET]
+# y_test = y_test[:TEST_SET]
 x_train, x_test = x_train / 255.0, x_test / 255.0
 print("x_train.shape", x_train.shape)
 x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)  # 给数据增加一个维度，使数据和网络结构匹配
