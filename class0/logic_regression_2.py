@@ -94,7 +94,7 @@ test_acc = []
 for i in range(epoch + 1):
     with tf.GradientTape() as tape:
         pred = 1 / (1 + tf.exp(-tf.matmul(X, W)))
-        # TODO: Why nagetive?
+        # 负号：熵与交叉熵的定义
         loss = -tf.reduce_mean(Y * tf.math.log(pred) + (1 - Y) * tf.math.log(1 - pred))
     pred_test = 1 / (1 + tf.exp(-tf.matmul(X_test, W)))
     loss_test = -tf.reduce_mean(Y_test * tf.math.log(pred_test) + (1 - Y_test) * tf.math.log(1 - pred_test))

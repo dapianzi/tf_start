@@ -106,7 +106,6 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_save_path,
 history = model.fit(x_train, y_train, batch_size=32, epochs=5, validation_data=(x_test, y_test), validation_freq=1,
                     callbacks=[cp_callback])
 model.summary()
-# TODO
 
 print("""model total params should be :
 TO BE CONTINUED
